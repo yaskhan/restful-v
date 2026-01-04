@@ -1,6 +1,7 @@
 module tests
 
 import restful
+import x.json2 as json
 
 // Mock backend for event tests
 struct EventMockBackend {
@@ -28,8 +29,10 @@ fn test_api_on_request_event() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut event_called := false
-    mut event_data: restful.EventData = unsafe { nil }
-    
+	mut event_data := restful.EventData(restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	})
     api.on('request', fn [mut event_called, mut event_data] (data restful.EventData) {
         event_called = true
         event_data = data
@@ -59,8 +62,10 @@ fn test_api_on_response_event() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut event_called := false
-    mut event_data: restful.EventData = unsafe { nil }
-    
+	mut event_data := restful.EventData(restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	})
     api.on('response', fn [mut event_called, mut event_data] (data restful.EventData) {
         event_called = true
         event_data = data
@@ -86,8 +91,10 @@ fn test_api_on_error_event() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut event_called := false
-    mut event_data: restful.EventData = unsafe { nil }
-    
+	mut event_data := restful.EventData(restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	})
     api.on('error', fn [mut event_called, mut event_data] (data restful.EventData) {
         event_called = true
         event_data = data
@@ -215,10 +222,15 @@ fn test_event_data_types() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_data: restful.RequestConfig = unsafe { nil }
-    mut response_data: restful.Response = unsafe { nil }
-    
+	mut request_data := restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	}
+	mut response_data := restful.Response{
+		status_code: 0
+		headers: map[string]string{}
+		body: ''
+	}
     api.on('request', fn [mut request_data] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_data = data
@@ -246,9 +258,7 @@ fn test_event_with_error_data() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut error_data: IError = unsafe { nil }
-    
+	mut error_data := error('')
     api.on('error', fn [mut error_data] (data restful.EventData) {
         if data is IError {
             error_data = data
@@ -501,9 +511,11 @@ fn test_event_with_error_response() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut response_data: restful.Response = unsafe { nil }
-    
+	mut response_data := restful.Response{
+		status_code: 0
+		headers: map[string]string{}
+		body: ''
+	}
     api.on('response', fn [mut response_data] (data restful.EventData) {
         if data is restful.Response {
             response_data = data
@@ -534,9 +546,11 @@ fn test_event_with_server_error() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut response_data: restful.Response = unsafe { nil }
-    
+	mut response_data := restful.Response{
+		status_code: 0
+		headers: map[string]string{}
+		body: ''
+	}
     api.on('response', fn [mut response_data] (data restful.EventData) {
         if data is restful.Response {
             response_data = data
@@ -562,9 +576,7 @@ fn test_event_with_request_headers() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_headers: map[string]string = map[string]string{}
-    
+	mut request_headers := map[string]string{}
     api.on('request', fn [mut request_headers] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_headers = data.headers
@@ -591,9 +603,7 @@ fn test_event_with_request_params() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_params: map[string]string = map[string]string{}
-    
+	mut request_params := map[string]string{}
     api.on('request', fn [mut request_params] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_params = data.params
@@ -656,9 +666,7 @@ fn test_event_with_response_headers() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut response_headers: map[string]string = map[string]string{}
-    
+	mut response_headers := map[string]string{}
     api.on('response', fn [mut response_headers] (data restful.EventData) {
         if data is restful.Response {
             response_headers = data.headers
@@ -1319,9 +1327,7 @@ fn test_event_with_header_inheritance() {
     
     mut api := restful.restful('http://api.example.com', backend)
     api.header('AuthToken', 'test-token')
-    
-    mut request_headers: map[string]string = map[string]string{}
-    
+	mut request_headers := map[string]string{}
     api.on('request', fn [mut request_headers] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_headers = data.headers
@@ -1959,9 +1965,7 @@ fn test_event_with_entity_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -1989,9 +1993,7 @@ fn test_event_with_collection_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2017,9 +2019,7 @@ fn test_event_with_member_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2045,9 +2045,7 @@ fn test_event_with_custom_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2072,9 +2070,7 @@ fn test_event_with_entity_custom_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2102,9 +2098,7 @@ fn test_event_with_entity_all_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2132,9 +2126,7 @@ fn test_event_with_entity_one_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2162,9 +2154,7 @@ fn test_event_with_collection_one_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2190,9 +2180,7 @@ fn test_event_with_collection_custom_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2218,9 +2206,7 @@ fn test_event_with_member_one_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2246,9 +2232,7 @@ fn test_event_with_member_all_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2274,9 +2258,7 @@ fn test_event_with_member_custom_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2302,9 +2284,7 @@ fn test_event_with_entity_save_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2330,9 +2310,7 @@ fn test_event_with_entity_delete_chaining_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2417,9 +2395,7 @@ fn test_event_with_entity_header_inheritance_events() {
     
     mut api := restful.restful('http://api.example.com', backend)
     api.header('AuthToken', 'test-token')
-    
-    mut request_headers: map[string]string = map[string]string{}
-    
+	mut request_headers := map[string]string{}
     api.on('request', fn [mut request_headers] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_headers = data.headers
@@ -2760,9 +2736,7 @@ fn test_event_with_entity_custom_mixed_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2790,9 +2764,7 @@ fn test_event_with_entity_custom_relative_nested_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2820,9 +2792,7 @@ fn test_event_with_entity_custom_absolute_relative_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2850,9 +2820,7 @@ fn test_event_with_entity_custom_absolute_absolute_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2880,9 +2848,7 @@ fn test_event_with_entity_custom_relative_absolute_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2910,9 +2876,7 @@ fn test_event_with_entity_custom_multiple_relative_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2941,9 +2905,7 @@ fn test_event_with_entity_custom_multiple_absolute_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url
@@ -2972,9 +2934,7 @@ fn test_event_with_entity_custom_mixed_multiple_url_events() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut request_urls: []string = []
-    
+	mut request_urls := []string{}
     api.on('request', fn [mut request_urls] (data restful.EventData) {
         if data is restful.RequestConfig {
             request_urls << data.url

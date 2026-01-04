@@ -1,5 +1,7 @@
 module restful
 
+import net.http
+
 pub interface Backend {
 	do(req RequestConfig) !Response
 }
@@ -13,11 +15,21 @@ pub:
 	params  map[string]string
 }
 
-pub struct Response {
-pub:
-	status_code int
-	headers     map[string]string
-	body        string
+fn append_query_params(url string, params map[string]string) string {
+	if params.len == 0 {
+		return url
+	}
+
+	mut keys := params.keys()
+	keys.sort()
+
+	mut parts := []string{cap: keys.len}
+	for key in keys {
+		parts << '${key}=${params[key]}'
+	}
+
+	sep := if url.contains('?') { '&' } else { '?' }
+	return url + sep + parts.join('&')
 }
 
 // Fetch backend for browsers
@@ -44,13 +56,15 @@ pub fn fetch_backend(fetch_fn fn (url string, options FetchOptions) !FetchRespon
 }
 
 pub fn (b &FetchBackend) do(req RequestConfig) !Response {
+	url := append_query_params(req.url, req.params)
+
 	options := FetchOptions{
 		method:  req.method
 		headers: req.headers
 		body:    req.data
 	}
 
-	resp := b.fetch_fn(req.url, options)!
+	resp := b.fetch_fn(url, options)!
 
 	return Response{
 		status_code: resp.status
@@ -84,9 +98,11 @@ pub fn request_backend(request_fn fn (options RequestOptions) !RequestResponse) 
 }
 
 pub fn (b &RequestBackend) do(req RequestConfig) !Response {
+	url := append_query_params(req.url, req.params)
+
 	options := RequestOptions{
 		method:  req.method
-		url:     req.url
+		url:     url
 		headers: req.headers
 		body:    req.data
 	}
@@ -103,67 +119,45 @@ pub fn (b &RequestBackend) do(req RequestConfig) !Response {
 // Default HTTP backend using V's net.http
 pub struct HttpBackend {}
 
-pub fn (b &HttpBackend) do(req RequestConfig) !Response {
-	mut headers := http.new_header()
+fn http_method_from_string(method string) !http.Method {
+	return match method {
+		'GET' { .get }
+		'POST' { .post }
+		'PUT' { .put }
+		'PATCH' { .patch }
+		'DELETE' { .delete }
+		'HEAD' { .head }
+		else { return error('Unsupported method: ${method}') }
+	}
+}
 
+pub fn (b &HttpBackend) do(req RequestConfig) !Response {
+	url := append_query_params(req.url, req.params)
+
+	mut header := http.new_header()
 	for key, value in req.headers {
-		headers.add_custom(key, value) or {}
+		header.add_custom(key, value) or {}
 	}
 
-	mut client := http.Client
-	{}
+	method := http_method_from_string(req.method)!
 
-	match req.method {
-		'GET' {
-			resp := client.get(req.url)!
-			return Response{
-				status_code: resp.status_code
-				headers:     resp.headers
-				body:        resp.body
-			}
-		}
-		'POST' {
-			resp := client.post(req.url, req.data or { '' })!
-			return Response{
-				status_code: resp.status_code
-				headers:     resp.headers
-				body:        resp.body
-			}
-		}
-		'PUT' {
-			resp := client.put(req.url, req.data or { '' })!
-			return Response{
-				status_code: resp.status_code
-				headers:     resp.headers
-				body:        resp.body
-			}
-		}
-		'PATCH' {
-			resp := client.patch(req.url, req.data or { '' })!
-			return Response{
-				status_code: resp.status_code
-				headers:     resp.headers
-				body:        resp.body
-			}
-		}
-		'DELETE' {
-			resp := client.delete(req.url)!
-			return Response{
-				status_code: resp.status_code
-				headers:     resp.headers
-				body:        resp.body
-			}
-		}
-		'HEAD' {
-			resp := client.head(req.url)!
-			return Response{
-				status_code: resp.status_code
-				headers:     resp.headers
-				body:        resp.body
-			}
-		}
-		else {
-			return error('Unsupported method: ${req.method}')
-		}
+	mut config := http.FetchConfig{
+		url:    url
+		method: method
+		header: header
+		data:   req.data or { '' }
+	}
+
+	http_resp := http.fetch(config)!
+
+	mut resp_headers := map[string]string{}
+	for key in http_resp.header.keys() {
+		resp_headers[key] = http_resp.header.get_custom(key) or { '' }
+	}
+
+	return Response{
+		status_code: http_resp.status_code
+		headers:     resp_headers
+		body:        http_resp.body
 	}
 }

@@ -1,7 +1,7 @@
 module tests
 
 import restful
-import json
+import x.json2 as json
 
 // Mock backend for entity tests
 struct EntityMockBackend {

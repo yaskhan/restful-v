@@ -1,7 +1,7 @@
 module tests
 
 import restful
-import json
+import x.json2 as json
 
 // Mock backend for interceptor tests
 struct InterceptorMockBackend {
@@ -29,8 +29,10 @@ fn test_request_interceptor() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut called := false
-    mut captured_config: restful.RequestConfig = unsafe { nil }
-    
+	mut captured_config := restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	}
     api.add_request_interceptor(fn [mut called, mut captured_config] (config restful.RequestConfig) restful.RequestConfig {
         called = true
         captured_config = config
@@ -57,9 +59,15 @@ fn test_response_interceptor() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut called := false
-    mut captured_response: restful.Response = unsafe { nil }
-    mut captured_config: restful.RequestConfig = unsafe { nil }
-    
+	mut captured_response := restful.Response{
+		status_code: 0
+		headers: map[string]string{}
+		body: ''
+	}
+	mut captured_config := restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	}
     api.add_response_interceptor(fn [mut called, mut captured_response, mut captured_config] (response restful.Response, config restful.RequestConfig) restful.Response {
         called = true
         captured_response = response
@@ -83,9 +91,11 @@ fn test_error_interceptor() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut called := false
-    mut captured_error: IError = unsafe { nil }
-    mut captured_config: restful.RequestConfig = unsafe { nil }
-    
+	mut captured_error := error('')
+	mut captured_config := restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	}
     api.add_error_interceptor(fn [mut called, mut captured_error, mut captured_config] (err IError, config restful.RequestConfig) IError {
         called = true
         captured_error = err
@@ -421,9 +431,7 @@ fn test_interceptor_with_params() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut captured_params: map[string]string = map[string]string{}
-    
+	mut captured_params := map[string]string{}
     api.add_request_interceptor(fn [mut captured_params] (config restful.RequestConfig) restful.RequestConfig {
         captured_params = config.params
         return config
@@ -451,9 +459,7 @@ fn test_interceptor_with_custom_headers() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut captured_headers: map[string]string = map[string]string{}
-    
+	mut captured_headers := map[string]string{}
     api.add_request_interceptor(fn [mut captured_headers] (config restful.RequestConfig) restful.RequestConfig {
         captured_headers = config.headers
         return config
@@ -602,9 +608,7 @@ fn test_interceptor_with_complex_headers() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut captured_headers: map[string]string = map[string]string{}
-    
+	mut captured_headers := map[string]string{}
     api.add_request_interceptor(fn [mut captured_headers] (config restful.RequestConfig) restful.RequestConfig {
         captured_headers = config.headers
         return config
@@ -914,9 +918,10 @@ fn test_interceptor_with_empty_config() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut captured_config: restful.RequestConfig = unsafe { nil }
-    
+	mut captured_config := restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	}
     api.add_request_interceptor(fn [mut captured_config] (config restful.RequestConfig) restful.RequestConfig {
         captured_config = config
         return config
@@ -939,9 +944,10 @@ fn test_interceptor_with_full_config() {
     }
     
     mut api := restful.restful('http://api.example.com', backend)
-    
-    mut captured_config: restful.RequestConfig = unsafe { nil }
-    
+	mut captured_config := restful.RequestConfig{
+		headers: map[string]string{}
+		params: map[string]string{}
+	}
     api.add_request_interceptor(fn [mut captured_config] (config restful.RequestConfig) restful.RequestConfig {
         captured_config = config
         return config

@@ -1,7 +1,7 @@
 module tests
 
 import restful
-import json
+import x.json2 as json
 
 // Mock backend for testing
 struct MockBackend {
@@ -416,7 +416,7 @@ fn test_http_backend() {
 }
 
 fn test_fetch_backend() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         return restful.FetchResponse{
             status: 200
             headers: {'Content-Type': 'application/json'}
@@ -429,7 +429,7 @@ fn test_fetch_backend() {
 }
 
 fn test_request_backend() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         return restful.RequestResponse{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
