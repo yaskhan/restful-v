@@ -80,7 +80,7 @@ fn test_request_response_structure() {
 }
 
 fn test_fetch_backend_do() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         assert url == 'http://api.example.com/test'
         assert options.method == 'GET'
         return restful.FetchResponse{
@@ -105,7 +105,7 @@ fn test_fetch_backend_do() {
 }
 
 fn test_request_backend_do() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         assert options.method == 'POST'
         assert options.url == 'http://api.example.com/test'
         return restful.RequestResponse{
@@ -136,7 +136,7 @@ fn test_http_backend_structure() {
 }
 
 fn test_fetch_backend_structure() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         return restful.FetchResponse{
             status: 200
             headers: map[string]string{}
@@ -149,7 +149,7 @@ fn test_fetch_backend_structure() {
 }
 
 fn test_request_backend_structure() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         return restful.RequestResponse{
             status_code: 200
             headers: map[string]string{}
@@ -163,7 +163,7 @@ fn test_request_backend_structure() {
 
 fn test_backend_interface() {
     // Test that all backends implement the Backend interface
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         return restful.FetchResponse{
             status: 200
             headers: map[string]string{}
@@ -171,7 +171,7 @@ fn test_backend_interface() {
         }
     }
     
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         return restful.RequestResponse{
             status_code: 200
             headers: map[string]string{}
@@ -197,7 +197,7 @@ fn test_backend_interface() {
 }
 
 fn test_fetch_backend_with_data() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         assert options.body != none
         assert options.body == '{"test": "data"}'
         return restful.FetchResponse{
@@ -221,7 +221,7 @@ fn test_fetch_backend_with_data() {
 }
 
 fn test_request_backend_with_params() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         assert options.url == 'http://api.example.com/test?debug=true'
         return restful.RequestResponse{
             status_code: 200
@@ -243,7 +243,7 @@ fn test_request_backend_with_params() {
 }
 
 fn test_fetch_backend_error() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         return error('Network error')
     }
     
@@ -264,7 +264,7 @@ fn test_fetch_backend_error() {
 }
 
 fn test_request_backend_error() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         return error('Request error')
     }
     
@@ -288,7 +288,7 @@ fn test_fetch_backend_all_methods() {
     methods := ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']
     
     for method in methods {
-        fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+        mock_fetch := fn [method] (url string, options restful.FetchOptions) !restful.FetchResponse {
             assert options.method == method
             return restful.FetchResponse{
                 status: 200
@@ -314,7 +314,7 @@ fn test_request_backend_all_methods() {
     methods := ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']
     
     for method in methods {
-        fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+        mock_request := fn [method] (options restful.RequestOptions) !restful.RequestResponse {
             assert options.method == method
             return restful.RequestResponse{
                 status_code: 200
@@ -337,7 +337,7 @@ fn test_request_backend_all_methods() {
 }
 
 fn test_fetch_backend_headers() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         assert options.headers['Authorization'] == 'Bearer token'
         assert options.headers['Content-Type'] == 'application/json'
         return restful.FetchResponse{
@@ -363,7 +363,7 @@ fn test_fetch_backend_headers() {
 }
 
 fn test_request_backend_headers() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         assert options.headers['Authorization'] == 'Bearer token'
         assert options.headers['Content-Type'] == 'application/json'
         return restful.RequestResponse{
@@ -389,7 +389,7 @@ fn test_request_backend_headers() {
 }
 
 fn test_fetch_backend_response_headers() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         return restful.FetchResponse{
             status: 200
             headers: {
@@ -415,7 +415,7 @@ fn test_fetch_backend_response_headers() {
 }
 
 fn test_request_backend_response_headers() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         return restful.RequestResponse{
             status_code: 200
             headers: {
@@ -441,7 +441,7 @@ fn test_request_backend_response_headers() {
 }
 
 fn test_fetch_backend_empty_body() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         assert options.body == none
         return restful.FetchResponse{
             status: 204
@@ -464,7 +464,7 @@ fn test_fetch_backend_empty_body() {
 }
 
 fn test_request_backend_empty_body() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         assert options.body == none
         return restful.RequestResponse{
             status_code: 204
@@ -487,7 +487,7 @@ fn test_request_backend_empty_body() {
 }
 
 fn test_fetch_backend_complex_response() {
-    fn mock_fetch(url string, options restful.FetchOptions) !restful.FetchResponse {
+    mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         return restful.FetchResponse{
             status: 200
             headers: {
@@ -516,7 +516,7 @@ fn test_fetch_backend_complex_response() {
 }
 
 fn test_request_backend_complex_response() {
-    fn mock_request(options restful.RequestOptions) !restful.RequestResponse {
+    mock_request := fn (options restful.RequestOptions) !restful.RequestResponse {
         return restful.RequestResponse{
             status_code: 201
             headers: {
