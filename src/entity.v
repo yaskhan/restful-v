@@ -13,7 +13,7 @@ pub fn (e &Entity) data() map[string]json.Any {
 }
 
 pub fn (e &Entity) id() string {
-    return e.data[e.member.api.identifier].str()
+    return e.data[e.member.api.identifier] or { json.Any('') }.str()
 }
 
 pub fn (e &Entity) url() string {
@@ -21,11 +21,11 @@ pub fn (e &Entity) url() string {
 }
 
 pub fn (mut e Entity) save() !Response {
-    return e.member.put(e.data)
+    return e.member.put(e.data, map[string]string{}, map[string]string{})
 }
 
 pub fn (mut e Entity) delete() !Response {
-    return e.member.delete()
+    return e.member.delete(none, map[string]string{}, map[string]string{})
 }
 
 pub fn (e &Entity) one(name string, id string) &Member {
@@ -41,14 +41,14 @@ pub fn (e &Entity) custom(name string, is_relative bool) &Member {
 }
 
 pub struct Collection {
-mut:
+pub mut:
     api             &API
     name            string
     parent          ?&Member
     headers         map[string]string
     interceptors    &Interceptors
     event_listeners &map[string][]EventListener
-    identifier      string = 'id'
+    identifier      string
 }
 
 pub fn (mut c Collection) get(id string, params map[string]string, headers map[string]string) !Entity {
@@ -350,8 +350,8 @@ mut:
     headers         map[string]string
     interceptors    &Interceptors
     event_listeners &map[string][]EventListener
-    identifier      string = 'id'
-    custom_url      string = ''
+    identifier      string
+    custom_url      string
 }
 
 pub fn (mut m Member) get(params map[string]string, headers map[string]string) !Entity {
