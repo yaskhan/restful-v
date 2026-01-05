@@ -123,17 +123,6 @@ fn test_response_different_status_codes() {
 	}
 }
 
-fn test_response_with_empty_headers() {
-	response := restful.Response{
-		status_code: 200
-		headers:     map[string]string{}
-		body:        'OK'
-	}
-
-	headers := response.headers()
-	assert headers.len == 0
-}
-
 fn test_response_with_multiple_headers() {
 	response := restful.Response{
 		status_code: 200

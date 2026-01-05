@@ -38,12 +38,14 @@ pub struct FetchBackend {
 }
 
 pub struct FetchOptions {
+pub:
 	method  string
 	headers map[string]string
 	body    ?string
 }
 
 pub struct FetchResponse {
+pub:
 	status  int
 	headers map[string]string
 	body    string
@@ -79,6 +81,7 @@ pub struct RequestBackend {
 }
 
 pub struct RequestOptions {
+pub:
 	method  string
 	url     string
 	headers map[string]string
@@ -86,6 +89,7 @@ pub struct RequestOptions {
 }
 
 pub struct RequestResponse {
+pub:
 	status_code int
 	headers     map[string]string
 	body        string

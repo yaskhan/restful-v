@@ -386,7 +386,7 @@ fn test_event_with_custom_endpoint() {
     mut api := restful.restful('http://api.example.com', backend)
     
     mut event_called := false
-    mut event_url = ''
+    mut event_url := ''
     
     api.on('request', fn [mut event_called, mut event_url] (data restful.EventData) {
         if data is restful.RequestConfig {
@@ -413,7 +413,7 @@ fn test_event_with_absolute_url() {
     
     mut api := restful.restful('http://api.example.com', backend)
     
-    mut event_url = ''
+    mut event_url := ''
     
     api.on('request', fn [mut event_url] (data restful.EventData) {
         if data is restful.RequestConfig {
@@ -633,7 +633,7 @@ fn test_event_with_request_data() {
     
     mut api := restful.restful('http://api.example.com', backend)
     
-    mut request_data: ?string = none
+    mut request_data := ?string(none)
     
     api.on('request', fn [mut request_data] (data restful.EventData) {
         if data is restful.RequestConfig {
@@ -648,7 +648,7 @@ fn test_event_with_request_data() {
     
     collection.post(data, map[string]string{}, map[string]string{})!
     
-    assert request_data != none
+    assert request_data !is none
     assert request_data!.contains('Test')
 }
 

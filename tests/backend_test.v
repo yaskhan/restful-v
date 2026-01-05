@@ -38,7 +38,7 @@ fn test_fetch_options_structure() {
     
     assert options.method == 'POST'
     assert options.headers['X-Custom'] == 'value'
-    assert options.body == '{"data": "test"}'
+    assert options.body? == '{"data": "test"}'
 }
 
 fn test_fetch_response_structure() {
@@ -64,7 +64,7 @@ fn test_request_options_structure() {
     assert options.method == 'PUT'
     assert options.url == 'http://api.example.com/test'
     assert options.headers['X-Update'] == 'true'
-    assert options.body == '{"update": "data"}'
+    assert options.body? == '{"update": "data"}'
 }
 
 fn test_request_response_structure() {
@@ -132,7 +132,7 @@ fn test_request_backend_do() {
 
 fn test_http_backend_structure() {
     backend := &restful.HttpBackend{}
-    assert backend != none
+    assert backend != unsafe { nil }
 }
 
 fn test_fetch_backend_structure() {
@@ -145,7 +145,7 @@ fn test_fetch_backend_structure() {
     }
     
     backend := restful.fetch_backend(mock_fetch)
-    assert backend != none
+    assert backend != unsafe { nil }
 }
 
 fn test_request_backend_structure() {
@@ -158,7 +158,7 @@ fn test_request_backend_structure() {
     }
     
     backend := restful.request_backend(mock_request)
-    assert backend != none
+    assert backend != unsafe { nil }
 }
 
 fn test_backend_interface() {
@@ -199,7 +199,9 @@ fn test_backend_interface() {
 fn test_fetch_backend_with_data() {
     mock_fetch := fn (url string, options restful.FetchOptions) !restful.FetchResponse {
         assert options.body != none
-        assert options.body == '{"test": "data"}'
+        if options.body != none {
+            assert options.body? == '{"test": "data"}'
+        }
         return restful.FetchResponse{
             status: 200
             headers: map[string]string{}

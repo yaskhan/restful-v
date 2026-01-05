@@ -58,8 +58,8 @@ pub fn (mut c Collection) get(id string, params map[string]string, headers map[s
         id:              id
         parent:          c.parent
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
     }
 
@@ -121,8 +121,8 @@ pub fn (mut c Collection) get_all(params map[string]string, headers map[string]s
                     id:              item[c.identifier].str()
                     parent:          c.parent
                     headers:         c.headers.clone()
-                    interceptors:    c.interceptors
-                    event_listeners: c.event_listeners
+                    interceptors:    unsafe { c.interceptors }
+                    event_listeners: unsafe { c.event_listeners }
                     identifier:      c.identifier
                 }
             }
@@ -133,7 +133,7 @@ pub fn (mut c Collection) get_all(params map[string]string, headers map[string]s
         for interceptor in c.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(c.event_listeners, 'error', err)
+        emit(c.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -185,7 +185,7 @@ pub fn (mut c Collection) post(data map[string]json.Any, params map[string]strin
         for interceptor in c.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(c.event_listeners, 'error', err)
+        emit(c.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -197,8 +197,8 @@ pub fn (mut c Collection) put(id string, data map[string]json.Any, params map[st
         id:              id
         parent:          c.parent
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
     }
 
@@ -212,8 +212,8 @@ pub fn (mut c Collection) patch(id string, data map[string]json.Any, params map[
         id:              id
         parent:          c.parent
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
     }
 
@@ -227,8 +227,8 @@ pub fn (mut c Collection) delete(id string, data map[string]json.Any, params map
         id:              id
         parent:          c.parent
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
     }
 
@@ -242,8 +242,8 @@ pub fn (mut c Collection) head(id string, params map[string]string, headers map[
         id:              id
         parent:          c.parent
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
     }
 
@@ -257,8 +257,8 @@ pub fn (mut c Collection) one(name string, id string) &Member {
         id:              id
         parent:          c.parent
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
     }
 
@@ -273,8 +273,8 @@ pub fn (mut c Collection) custom(name string, is_relative bool) &Member {
         id:              ''
         parent:          none
         headers:         c.headers.clone()
-        interceptors:    c.interceptors
-        event_listeners: c.event_listeners
+        interceptors:    unsafe { c.interceptors }
+        event_listeners: unsafe { c.event_listeners }
         identifier:      c.identifier
         custom_url:      url
     }
@@ -395,14 +395,14 @@ pub fn (mut m Member) get(params map[string]string, headers map[string]string) !
         data := json.decode[map[string]json.Any](final_response.body)!
         return Entity{
             data:   data
-            member: &m
+            member: unsafe { &m }
         }
     } else {
         mut err := error('HTTP ${final_response.status_code}')
         for interceptor in m.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(m.event_listeners, 'error', err)
+        emit(m.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -454,7 +454,7 @@ pub fn (mut m Member) post(data map[string]json.Any, params map[string]string, h
         for interceptor in m.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(m.event_listeners, 'error', err)
+        emit(m.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -506,7 +506,7 @@ pub fn (mut m Member) put(data map[string]json.Any, params map[string]string, he
         for interceptor in m.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(m.event_listeners, 'error', err)
+        emit(m.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -558,7 +558,7 @@ pub fn (mut m Member) patch(data map[string]json.Any, params map[string]string, 
         for interceptor in m.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(m.event_listeners, 'error', err)
+        emit(m.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -610,7 +610,7 @@ pub fn (mut m Member) delete(data ?map[string]json.Any, params map[string]string
         for interceptor in m.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(m.event_listeners, 'error', err)
+        emit(m.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -659,7 +659,7 @@ pub fn (mut m Member) head(params map[string]string, headers map[string]string) 
         for interceptor in m.interceptors.error {
             err = interceptor(err, final_config)
         }
-        emit(m.event_listeners, 'error', err)
+        emit(m.event_listeners, 'error', ErrorEvent{err: err})
         return err
     }
 }
@@ -671,8 +671,8 @@ pub fn (m &Member) one(name string, id string) &Member {
         id:              id
         parent:          unsafe { m }
         headers:         m.headers.clone()
-        interceptors:    m.interceptors
-        event_listeners: m.event_listeners
+        interceptors:    unsafe { m.interceptors }
+        event_listeners: unsafe { m.event_listeners }
         identifier:      m.identifier
     }
 }
@@ -683,8 +683,8 @@ pub fn (m &Member) all(name string) &Collection {
         name:            name
         parent:          unsafe { m }
         headers:         m.headers.clone()
-        interceptors:    m.interceptors
-        event_listeners: m.event_listeners
+        interceptors:    unsafe { m.interceptors }
+        event_listeners: unsafe { m.event_listeners }
         identifier:      m.identifier
     }
 }
@@ -697,8 +697,8 @@ pub fn (m &Member) custom(name string, is_relative bool) &Member {
         id:              ''
         parent:          unsafe { m }
         headers:         m.headers.clone()
-        interceptors:    m.interceptors
-        event_listeners: m.event_listeners
+        interceptors:    unsafe { m.interceptors }
+        event_listeners: unsafe { m.event_listeners }
         identifier:      m.identifier
         custom_url:      url
     }

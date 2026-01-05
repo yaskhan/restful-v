@@ -26,8 +26,8 @@ pub fn (mut a API) all(name string) &Collection {
         name:            name
         parent:          none
         headers:         map[string]string{}
-        interceptors:    &a.interceptors
-        event_listeners: &a.event_listeners
+        interceptors:    unsafe { &a.interceptors }
+        event_listeners: unsafe { &a.event_listeners }
     }
 }
 
@@ -38,8 +38,8 @@ pub fn (mut a API) one(name string, id string) &Member {
         id:              id
         parent:          none
         headers:         map[string]string{}
-        interceptors:    &a.interceptors
-        event_listeners: &a.event_listeners
+        interceptors:    unsafe { &a.interceptors }
+        event_listeners: unsafe { &a.event_listeners }
     }
 }
 
@@ -51,8 +51,8 @@ pub fn (mut a API) custom(name string, is_relative bool) &Member {
         id:              ''
         parent:          none
         headers:         map[string]string{}
-        interceptors:    &a.interceptors
-        event_listeners: &a.event_listeners
+        interceptors:    unsafe { &a.interceptors }
+        event_listeners: unsafe { &a.event_listeners }
         custom_url:      url
     }
 }
@@ -70,7 +70,11 @@ pub fn (mut a API) identifier(id string) {
 }
 
 pub fn (mut a API) on(event string, listener EventListener) {
-    a.event_listeners[event] << listener
+    unsafe {
+        mut arr := a.event_listeners[event] or { []EventListener{} }
+        arr << listener
+        a.event_listeners[event] = arr
+    }
 }
 
 pub fn (mut a API) once(event string, listener EventListener) {
@@ -82,7 +86,11 @@ pub fn (mut a API) once(event string, listener EventListener) {
         called = true
         listener(data)
     }
-    a.event_listeners[event] << wrapped
+    unsafe {
+        mut arr := a.event_listeners[event] or { []EventListener{} }
+        arr << wrapped
+        a.event_listeners[event] = arr
+    }
 }
 
 pub fn (mut a API) add_request_interceptor(interceptor RequestInterceptor) {

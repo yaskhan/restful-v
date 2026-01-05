@@ -10,7 +10,7 @@ mut:
     error    IError
 }
 
-pub fn (mut b MockBackend) do(req restful.RequestConfig) !restful.Response {
+pub fn (b MockBackend) do(req restful.RequestConfig) !restful.Response {
     if b.error != none {
         return b.error
     }
@@ -18,15 +18,15 @@ pub fn (mut b MockBackend) do(req restful.RequestConfig) !restful.Response {
 }
 
 fn test_api_creation() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     api := restful.restful('http://api.example.com', backend)
-    
-    assert api.base_url == 'http://api.example.com'
+
+    assert api.base_url() == 'http://api.example.com'
     assert api.headers() == map[string]string{}
 }
 
 fn test_api_header() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
     
     api.header('AuthToken', 'test-token')
@@ -36,33 +36,33 @@ fn test_api_header() {
 }
 
 fn test_api_identifier() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
     
     api.identifier('_id')
-    assert api.identifier == '_id'
+    assert api.identifier() == '_id'
 }
 
 fn test_api_all() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
-    
+
     mut collection := api.all('articles')
     assert collection.url() == 'http://api.example.com/articles'
 }
 
 fn test_api_one() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
-    
+
     mut member := api.one('articles', '1')
     assert member.url() == 'http://api.example.com/articles/1'
 }
 
 fn test_api_custom() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
-    
+
     mut custom := api.custom('articles/beta', true)
     assert custom.url() == 'http://api.example.com/articles/beta'
     
@@ -71,7 +71,7 @@ fn test_api_custom() {
 }
 
 fn test_collection_get_all() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -91,7 +91,7 @@ fn test_collection_get_all() {
 }
 
 fn test_collection_get() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -102,14 +102,14 @@ fn test_collection_get() {
     mut api := restful.restful('http://api.example.com', backend)
     mut collection := api.all('articles')
     
-    entity := collection.get('1', map[string]string{}, map[string]string{})!
+    mut entity := collection.get('1', map[string]string{}, map[string]string{})!
     data := entity.data()
     assert data['id'] == json.Any('1')
     assert data['title'] == json.Any('Test')
 }
 
 fn test_collection_post() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 201
             headers: {'Content-Type': 'application/json'}
@@ -129,7 +129,7 @@ fn test_collection_post() {
 }
 
 fn test_collection_one() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
     mut collection := api.all('articles')
     
@@ -138,7 +138,7 @@ fn test_collection_one() {
 }
 
 fn test_member_get() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -149,14 +149,14 @@ fn test_member_get() {
     mut api := restful.restful('http://api.example.com', backend)
     mut member := api.one('articles', '1')
     
-    entity := member.get(map[string]string{}, map[string]string{})!
+    mut entity := member.get(map[string]string{}, map[string]string{})!
     data := entity.data()
     assert data['id'] == json.Any('1')
     assert data['title'] == json.Any('Test')
 }
 
 fn test_member_put() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -176,7 +176,7 @@ fn test_member_put() {
 }
 
 fn test_member_delete() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 204
             headers: map[string]string{}
@@ -192,7 +192,7 @@ fn test_member_delete() {
 }
 
 fn test_entity_save() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -203,16 +203,16 @@ fn test_entity_save() {
     mut api := restful.restful('http://api.example.com', backend)
     mut member := api.one('articles', '1')
     
-    entity := member.get(map[string]string{}, map[string]string{})!
+    mut entity := member.get(map[string]string{}, map[string]string{})!
     mut entity_data := entity.data()
     entity_data['title'] = json.Any('Saved')
-    
+
     response := entity.save()!
     assert response.status_code == 200
 }
 
 fn test_entity_delete() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 204
             headers: map[string]string{}
@@ -223,13 +223,13 @@ fn test_entity_delete() {
     mut api := restful.restful('http://api.example.com', backend)
     mut member := api.one('articles', '1')
     
-    entity := member.get(map[string]string{}, map[string]string{})!
+    mut entity := member.get(map[string]string{}, map[string]string{})!
     response := entity.delete()!
     assert response.status_code == 204
 }
 
 fn test_entity_id() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -240,12 +240,12 @@ fn test_entity_id() {
     mut api := restful.restful('http://api.example.com', backend)
     mut member := api.one('articles', '1')
     
-    entity := member.get(map[string]string{}, map[string]string{})!
+    mut entity := member.get(map[string]string{}, map[string]string{})!
     assert entity.id() == '123'
 }
 
 fn test_entity_url() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -256,12 +256,12 @@ fn test_entity_url() {
     mut api := restful.restful('http://api.example.com', backend)
     mut member := api.one('articles', '1')
     
-    entity := member.get(map[string]string{}, map[string]string{})!
+    mut entity := member.get(map[string]string{}, map[string]string{})!
     assert entity.url() == 'http://api.example.com/articles/1'
 }
 
 fn test_entity_chaining() {
-    backend := &MockBackend{}
+    backend := MockBackend{}
     mut api := restful.restful('http://api.example.com', backend)
     
     mut member := api.one('articles', '1')
@@ -271,7 +271,7 @@ fn test_entity_chaining() {
 }
 
 fn test_request_interceptor() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -294,7 +294,7 @@ fn test_request_interceptor() {
 }
 
 fn test_response_interceptor() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -317,7 +317,7 @@ fn test_response_interceptor() {
 }
 
 fn test_error_interceptor() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         error: error('Test error')
     }
     
@@ -339,7 +339,7 @@ fn test_error_interceptor() {
 }
 
 fn test_event_listeners() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -368,7 +368,7 @@ fn test_event_listeners() {
 }
 
 fn test_custom_identifier() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -382,12 +382,12 @@ fn test_custom_identifier() {
     mut collection := api.all('articles')
     collection.identifier('_id')
     
-    entity := collection.get('abc123', map[string]string{}, map[string]string{})!
+    mut entity := collection.get('abc123', map[string]string{}, map[string]string{})!
     assert entity.id() == 'abc123'
 }
 
 fn test_inheritance() {
-    mut backend := &MockBackend{
+    mut backend := MockBackend{
         response: restful.Response{
             status_code: 200
             headers: {'Content-Type': 'application/json'}
@@ -406,13 +406,13 @@ fn test_inheritance() {
     headers := collection.headers()
     assert headers['AuthToken'] == 'test'
     assert headers['X-Custom'] == 'value'
-    assert collection.identifier == '_id'
+    assert collection.identifier() == '_id'
 }
 
 fn test_http_backend() {
     // This test would require actual HTTP requests, so we'll just verify the structure
     backend := &restful.HttpBackend{}
-    assert backend != none
+    assert backend != unsafe { nil }
 }
 
 fn test_fetch_backend() {
@@ -425,7 +425,7 @@ fn test_fetch_backend() {
     }
     
     backend := restful.fetch_backend(mock_fetch)
-    assert backend != none
+    assert backend != unsafe { nil }
 }
 
 fn test_request_backend() {
@@ -438,7 +438,7 @@ fn test_request_backend() {
     }
     
     backend := restful.request_backend(mock_request)
-    assert backend != none
+    assert backend != unsafe { nil }
 }
 
 fn test_response_methods() {
