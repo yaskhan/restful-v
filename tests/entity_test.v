@@ -746,14 +746,14 @@ fn test_entity_delete_with_params() {
 	mut member := api.one('articles', '1')
 
 	mut entity := member.get(map[string]string{}, map[string]string{})!
-	
+
 	// Configure backend for delete
 	backend.response = restful.Response{
 		status_code: 204
 		headers:     map[string]string{}
 		body:        ''
 	}
-	
+
 	response := entity.delete()!
 	assert response.status_code == 204
 }

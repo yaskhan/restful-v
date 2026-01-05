@@ -548,19 +548,30 @@ fn test_event_with_all_methods() {
 		mut collection := api.all('articles')
 
 		match method {
-			'GET' { collection.get_all(map[string]string{}, map[string]string{})! }
-			'POST' { collection.post({
+			'GET' {
+				collection.get_all(map[string]string{}, map[string]string{})!
+			}
+			'POST' {
+				collection.post({
 					'test': json.Any('data')
-				}, map[string]string{}, map[string]string{})! }
-			'PUT' { collection.put('1', {
+				}, map[string]string{}, map[string]string{})!
+			}
+			'PUT' {
+				collection.put('1', {
 					'test': json.Any('data')
-				}, map[string]string{}, map[string]string{})! }
-			'PATCH' { collection.patch('1', {
+				}, map[string]string{}, map[string]string{})!
+			}
+			'PATCH' {
+				collection.patch('1', {
 					'test': json.Any('data')
-				}, map[string]string{}, map[string]string{})! }
-			'DELETE' { collection.delete('1', map[string]json.Any{}, map[string]string{},
-					map[string]string{})! }
-			'HEAD' { collection.head('1', map[string]string{}, map[string]string{})! }
+				}, map[string]string{}, map[string]string{})!
+			}
+			'DELETE' {
+				collection.delete('1', map[string]json.Any{}, map[string]string{}, map[string]string{})!
+			}
+			'HEAD' {
+				collection.head('1', map[string]string{}, map[string]string{})!
+			}
 			else {}
 		}
 
