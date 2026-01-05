@@ -35,9 +35,9 @@ fn test_entity_data() {
 	entity := member.get(map[string]string{}, map[string]string{})!
 	data := entity.data()
 
-	assert data['id'] == json.Any('1')
-	assert data['title'] == json.Any('Test')
-	assert data['body'] == json.Any('Content')
+	assert data['id'] or { json.Any('') } == json.Any('1')
+	assert data['title'] or { json.Any('') } == json.Any('Test')
+	assert data['body'] or { json.Any('') } == json.Any('Content')
 }
 
 fn test_entity_id() {
@@ -104,9 +104,11 @@ fn test_entity_save() {
 fn test_entity_delete() {
     mut backend := EntityMockBackend{
         response: restful.Response{
-            status_code: 204
-            headers:     map[string]string{}
-            body:        ''
+            status_code: 200
+            headers:     {
+                'Content-Type': 'application/json'
+            }
+            body:        '{"id": "1", "title": "Test"}'
         }
         error: IError(none)
     }
@@ -115,6 +117,14 @@ fn test_entity_delete() {
     mut member := api.one('articles', '1')
 
     mut entity := member.get(map[string]string{}, map[string]string{})!
+    
+    // Now configure backend for delete operation
+    backend.response = restful.Response{
+        status_code: 204
+        headers:     map[string]string{}
+        body:        ''
+    }
+    
     response := entity.delete()!
     assert response.status_code == 204
 }
@@ -170,8 +180,8 @@ fn test_collection_get() {
     mut entity := collection.get('1', map[string]string{}, map[string]string{})!
     data := entity.data()
 
-    assert data['id'] == json.Any('1')
-    assert data['title'] == json.Any('Test')
+    assert data['id'] or { json.Any('') } == json.Any('1')
+    assert data['title'] or { json.Any('') } == json.Any('Test')
 }
 
 fn test_collection_get_all() {
@@ -194,11 +204,11 @@ fn test_collection_get_all() {
 
     first := entities[0].data()
     second := entities[1].data()
-
-    assert first['id'] == json.Any('1')
-    assert first['title'] == json.Any('Test 1')
-    assert second['id'] == json.Any('2')
-    assert second['title'] == json.Any('Test 2')
+    
+    assert first['id'] or { json.Any('') } == json.Any('1')
+    assert first['title'] or { json.Any('') } == json.Any('Test 1')
+    assert second['id'] or { json.Any('') } == json.Any('2')
+    assert second['title'] or { json.Any('') } == json.Any('Test 2')
 }
 
 fn test_collection_post() {
@@ -340,8 +350,8 @@ fn test_member_get() {
     mut entity := member.get(map[string]string{}, map[string]string{})!
     data := entity.data()
 
-    assert data['id'] == json.Any('1')
-    assert data['title'] == json.Any('Test')
+    assert data['id'] or { json.Any('') } == json.Any('1')
+    assert data['title'] or { json.Any('') } == json.Any('Test')
 }
 
 fn test_member_post() {
@@ -614,7 +624,7 @@ fn test_collection_get_with_params() {
 	entity := collection.get('1', params, headers)!
 	data := entity.data()
 
-	assert data['id'] == json.Any('1')
+	assert data['id'] or { json.Any('') } == json.Any('1')
 }
 
 fn test_collection_get_all_with_params() {
@@ -667,7 +677,7 @@ fn test_member_get_with_params() {
 	entity := member.get(params, headers)!
 	data := entity.data()
 
-	assert data['id'] == json.Any('1')
+	assert data['id'] or { json.Any('') } == json.Any('1')
 }
 
 fn test_entity_save_with_params() {
@@ -1063,12 +1073,12 @@ fn test_entity_data_structure() {
     mut entity := member.get(map[string]string{}, map[string]string{})!
     data := entity.data()
 
-    assert data['id'] == json.Any('1')
-    assert data['title'] == json.Any('Test')
-    assert data['nested'] == json.Any({
-        'key': json.Any('value')
+    assert data['id'] or { json.Any('') } == json.Any('1')
+    assert data['title'] or { json.Any('') } == json.Any('Test')
+    assert data['nested'] or { json.Any('') } == json.Any({
+    	'key': json.Any('value')
     })
-    assert data['array'] == json.Any([json.Any(1), json.Any(2), json.Any(3)])
+    assert data['array'] or { json.Any('') } == json.Any([json.Any(1), json.Any(2), json.Any(3)])
 }
 
 fn test_collection_get_all_structure() {
@@ -1088,8 +1098,8 @@ fn test_collection_get_all_structure() {
     entities := collection.get_all(map[string]string{}, map[string]string{})!
 
     assert entities.len == 2
-    assert entities[0].data()['id'] == json.Any('1')
-    assert entities[1].data()['id'] == json.Any('2')
+    assert entities[0].data()['id'] or { json.Any('') } == json.Any('1')
+    assert entities[1].data()['id'] or { json.Any('') } == json.Any('2')
 }
 
 fn test_entity_url_inheritance() {
@@ -1144,8 +1154,8 @@ fn test_entity_header_inheritance() {
     articles.header('X-Custom', 'value')
 
     // Headers should be inherited
-    assert articles.headers()['AuthToken'] == 'test-token'
-    assert articles.headers()['X-Custom'] == 'value'
+    assert articles.headers()['AuthToken'] or { '' } == 'test-token'
+    assert articles.headers()['X-Custom'] or { '' } == 'value'
 }
 
 fn test_entity_event_propagation() {

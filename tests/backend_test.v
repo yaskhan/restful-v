@@ -39,8 +39,7 @@ fn test_fetch_options_structure() {
     assert options.method == 'POST'
     assert options.headers['X-Custom'] == 'value'
     if options.body != none {
-        body_str := options.body
-        assert body_str! == '{"data": "test"}'
+        assert options.body == '{"data": "test"}'
     }
 }
 
@@ -68,8 +67,7 @@ fn test_request_options_structure() {
     assert options.url == 'http://api.example.com/test'
     assert options.headers['X-Update'] == 'true'
     if options.body != none {
-        body_str := options.body
-        assert body_str! == '{"update": "data"}'
+        assert options.body == '{"update": "data"}'
     }
 }
 

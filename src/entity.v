@@ -118,7 +118,7 @@ pub fn (mut c Collection) get_all(params map[string]string, headers map[string]s
                 member: &Member{
                     api:             c.api
                     name:            c.name
-                    id:              item[c.identifier].str()
+                    id:              item[c.identifier] or { json.Any('') }.str()
                     parent:          c.parent
                     headers:         c.headers.clone()
                     interceptors:    unsafe { c.interceptors }

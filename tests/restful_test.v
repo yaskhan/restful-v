@@ -89,8 +89,8 @@ fn test_collection_get_all() {
     assert entities.len == 2
     
     first := entities[0].data()
-    assert first['id'] == json.Any('1')
-    assert first['title'] == json.Any('Test 1')
+    assert first['id'] or { json.Any('') } == json.Any('1')
+    assert first['title'] or { json.Any('') } == json.Any('Test 1')
 }
 
 fn test_collection_get() {
@@ -108,8 +108,8 @@ fn test_collection_get() {
     
     mut entity := collection.get('1', map[string]string{}, map[string]string{})!
     data := entity.data()
-    assert data['id'] == json.Any('1')
-    assert data['title'] == json.Any('Test')
+    assert data['id'] or { json.Any('') } == json.Any('1')
+    assert data['title'] or { json.Any('') } == json.Any('Test')
 }
 
 fn test_collection_post() {
@@ -157,8 +157,8 @@ fn test_member_get() {
     
     mut entity := member.get(map[string]string{}, map[string]string{})!
     data := entity.data()
-    assert data['id'] == json.Any('1')
-    assert data['title'] == json.Any('Test')
+    assert data['id'] or { json.Any('') } == json.Any('1')
+    assert data['title'] or { json.Any('') } == json.Any('Test')
 }
 
 fn test_member_put() {
