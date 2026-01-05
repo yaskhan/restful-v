@@ -1,7 +1,7 @@
 module main
 
 import restful
-import json
+import x.json2 as json
 
 fn main() {
 	// Использование с HTTP backend
@@ -14,13 +14,13 @@ fn main() {
 	all_articles := articles.get_all(map[string]string{}, map[string]string{})!
 	for article in all_articles {
 		data := article.data()
-		println('Article: ${data['title']}')
+		println('Article: ${data['title'] or { json.Any('') }.str()}')
 	}
 
 	// Получить одну статью
 	article := articles.get('1', map[string]string{}, map[string]string{})!
 	data := article.data()
-	println('Title: ${data['title']}')
+	println('Title: ${data['title'] or { json.Any('') }.str()}')
 
 	// Создать статью
 	new_article := {
@@ -32,7 +32,7 @@ fn main() {
 
 	// Обновить статью
 	mut article_entity := articles.get('1', map[string]string{}, map[string]string{})!
-	article_data := article_entity.data()
+	mut article_data := article_entity.data()
 	article_data['title'] = json.Any('Updated Title')
 	article_entity.save()!
 
@@ -40,11 +40,13 @@ fn main() {
 	article_entity.delete()!
 
 	// Работа с вложенными ресурсами
-	comments := articles.one('comments', '5')
+	mut comments := articles.one('comments', '5')
 	comment := comments.get(map[string]string{}, map[string]string{})!
 	comment_data := comment.data()
-	println('Comment: ${comment_data['body']}')
+	println('Comment: ${comment_data['body'] or { json.Any('') }.str()}')
 
 	// Цепочка вызовов
-	api.one('articles', '1').one('comments', '5').get(map[string]string{}, map[string]string{})!
+	mut member := api.one('articles', '1')
+	mut nested := member.one('comments', '5')
+	nested.get(map[string]string{}, map[string]string{})!
 }

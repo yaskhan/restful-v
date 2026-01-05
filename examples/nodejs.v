@@ -1,7 +1,7 @@
 module main
 
 import restful
-import json
+import x.json2 as json
 
 // Мок для Node.js request
 fn node_request(options restful.RequestOptions) !restful.RequestResponse {
@@ -21,8 +21,8 @@ fn main() {
 	mut api := restful.restful('http://api.example.com', backend)
 	api.identifier('_id')
 
-	articles := api.all('articles')
+	mut articles := api.all('articles')
 	article := articles.get('1', map[string]string{}, map[string]string{})!
 	data := article.data()
-	println('Article: ${data['title']}')
+	println('Article: ${data['title'] or { json.Any('') }.str()}')
 }

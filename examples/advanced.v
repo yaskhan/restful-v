@@ -1,7 +1,7 @@
 module main
 
 import restful
-import json
+import x.json2 as json
 
 fn main() {
 	mut api := restful.restful('http://api.example.com', &restful.HttpBackend{})
@@ -28,13 +28,13 @@ fn main() {
 
 	// События
 	api.on('error', fn (data restful.EventData) {
-		if data is IError {
-			println('Error event: ${data}')
+		if data is restful.ErrorEvent {
+			println('Error event: ${data.err}')
 		}
 	})
 
 	// Кастомный URL
-	custom := api.custom('articles/beta', true)
+	mut custom := api.custom('articles/beta', true)
 	custom.get(map[string]string{}, map[string]string{})!
 
 	// Работа с коллекцией
