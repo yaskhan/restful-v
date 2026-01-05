@@ -97,18 +97,20 @@ A custom endpoint acts like a member, and therefore you can use `one` and `all` 
 Once you have collections and members endpoints, fetch them to get *entities*. Restful.js exposes `get()` and `getAll()` methods for fetching endpoints. Since these methods are asynchronous, they return a result or error.
 
 ```v
+import x.json2 as json
+
 mut articleMember := api.one('articles', '1')  // http://api.example.com/articles/1
 articleEntity := articleMember.get(map[string]string{}, map[string]string{})!
 
 article := articleEntity.data()
-println(article['title']) // hello, world!
+println(article['title'] or { json.Any('') }.str()) // hello, world!
 
 mut commentsCollection := articleMember.all('comments')  // http://api.example.com/articles/1/comments
 commentEntities := commentsCollection.getAll(map[string]string{}, map[string]string{})!
 
 for commentEntity in commentEntities {
     comment := commentEntity.data()
-    println(comment['body'])
+    println(comment['body'] or { json.Any('') }.str())
 }
 ```
 
@@ -134,6 +136,8 @@ A response is made from the HTTP response fetched from the endpoint. It exposes 
 An entity is made from the HTTP response data fetched from the endpoint. It exposes a `data()` method:
 
 ```v
+import x.json2 as json
+
 mut articleCollection := api.all('articles')  // http://api.example.com/articles
 
 // http://api.example.com/articles/1
@@ -142,8 +146,8 @@ articleEntity := articleMember.get(map[string]string{}, map[string]string{})!
 
 // if the server response was { id: 1, title: 'test', body: 'hello' }
 article := articleEntity.data()
-article['title'] // returns `test`
-article['body'] // returns `hello`
+article['title'] or { json.Any('') }.str() // returns `test`
+article['body'] or { json.Any('') }.str() // returns `hello`
 // You can also edit it
 article['title'] = json.Any('test2')
 // Finally you can easily update it or delete it
@@ -161,6 +165,8 @@ You can also use the entity to continue exploring the API. Entities expose sever
 * `entity.id ()`: Get the id of the entity.
 
 ```v
+import x.json2 as json
+
 mut articleMember := api.one('articles', '1')  // http://api.example.com/articles/1
 mut commentMember := articleMember.one('comments', '3')  // http://api.example.com/articles/1/comments/3
 commentEntity := commentMember.get(map[string]string{}, map[string]string{})!
@@ -170,7 +176,7 @@ authorEntities := commentEntity.all('authors').getAll(map[string]string{}, map[s
 
 for authorEntity in authorEntities {
     author := authorEntity.data()
-    println(author['name'])
+    println(author['name'] or { json.Any('') }.str())
 }
 ```
 
@@ -195,7 +201,8 @@ mut articlesCollection := api.all('articles')
 articlesCollection.get('1', map[string]string{}, map[string]string{})! // will send the `AuthToken` header
 // You can configure articlesCollection, too
 articlesCollection.header('foo', 'bar')
-articlesCollection.one('comments', '1').get(map[string]string{}, map[string]string{})! // will send both the AuthToken and foo headers
+mut commentsCollection := articlesCollection.one('comments', '1')
+commentsCollection.get(map[string]string{}, map[string]string{})! // will send both the AuthToken and foo headers
 ```
 
 ## API Reference
@@ -318,6 +325,8 @@ resource.add_error_interceptor(fn (err IError, config restful.RequestConfig) IEr
 To deal with errors, you can either use error interceptors, error callbacks on promise or error events.
 
 ```v
+import x.json2 as json
+
 mut commentMember := api.one('articles', '1').one('comments', '2')
 commentEntity := commentMember.get(map[string]string{}, map[string]string{}) or {
     // deal with the error
